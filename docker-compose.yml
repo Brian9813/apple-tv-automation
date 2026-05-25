@@ -1,0 +1,12 @@
+services:
+  apple-tv-automation:
+    build: .
+    container_name: apple-tv-automation
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      APPLE_TV_APP_HOST: 0.0.0.0
+      APPLE_TV_APP_PORT: 8000
+      HOME: /data
+    volumes:
+      - ./data:/data

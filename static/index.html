@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Apple TV Automation</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar">
+        <div>
+          <h1>Apple TV Automation</h1>
+          <p id="status">Ready</p>
+        </div>
+        <button id="scan-button" class="primary">Scan</button>
+      </section>
+
+      <section class="layout">
+        <aside class="devices-panel">
+          <div class="section-title">Devices</div>
+          <div id="devices" class="devices"></div>
+        </aside>
+
+        <section class="remote-panel">
+          <div class="selected-device">
+            <div>
+              <div class="section-title">Selected</div>
+              <h2 id="selected-name">No Apple TV selected</h2>
+              <p id="selected-details">Scan and choose a device.</p>
+            </div>
+            <button id="pair-button" class="secondary" disabled>Pair</button>
+          </div>
+
+          <div class="remote-grid">
+            <button data-command="on" title="Power on">Power On</button>
+            <button data-command="off" title="Power off">Power Off</button>
+            <button data-command="home" title="Home">Home</button>
+            <button data-command="menu" title="Menu">Menu</button>
+          </div>
+
+          <div class="direction-pad">
+            <button data-command="up" class="up" title="Up">Up</button>
+            <button data-command="left" class="left" title="Left">Left</button>
+            <button data-command="select" class="select" title="Select">OK</button>
+            <button data-command="right" class="right" title="Right">Right</button>
+            <button data-command="down" class="down" title="Down">Down</button>
+          </div>
+
+          <div class="remote-grid">
+            <button data-command="play" title="Play">Play</button>
+            <button data-command="pause" title="Pause">Pause</button>
+            <button data-command="top_menu" title="Top menu">Top Menu</button>
+            <button id="now-button" title="Now playing" disabled>Now Playing</button>
+          </div>
+
+          <div id="now-playing" class="now-playing"></div>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="pair-dialog">
+      <form method="dialog" id="pair-form">
+        <h2>Pair Apple TV</h2>
+        <p id="pair-message">Enter the PIN shown on your Apple TV.</p>
+        <input id="pin-input" inputmode="numeric" autocomplete="one-time-code" placeholder="PIN">
+        <div class="dialog-actions">
+          <button value="cancel" class="secondary">Cancel</button>
+          <button id="finish-pair-button" value="default" class="primary">Pair</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
