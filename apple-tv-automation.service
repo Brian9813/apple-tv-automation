@@ -5,11 +5,11 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/apple-tv-automation
+User=appletv
+WorkingDirectory=/opt/apple-tv-automation
 Environment=APPLE_TV_APP_HOST=0.0.0.0
 Environment=APPLE_TV_APP_PORT=8000
-ExecStart=/home/pi/apple-tv-automation/.venv/bin/python /home/pi/apple-tv-automation/server.py
+ExecStart=/opt/apple-tv-automation/.venv/bin/python /opt/apple-tv-automation/server.py
 Restart=on-failure
 RestartSec=5
 

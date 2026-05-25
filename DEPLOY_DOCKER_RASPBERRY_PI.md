@@ -1,24 +1,33 @@
-# Deploy with Docker on Raspberry Pi
+# Docker Deployment on Raspberry Pi
 
-This runs Apple TV Automation as a Docker container on the Raspberry Pi.
+This deployment runs Apple TV Automation in Docker on a Raspberry Pi.
 
 The container uses host networking because Apple TV discovery depends on local
 network discovery/mDNS. Pairing credentials are stored in `./data/.pyatv.conf`
-on the Pi so they survive container rebuilds.
+next to the compose file, so they survive container rebuilds.
 
-## 1. Install Docker on the Pi
+## Placeholders
+
+Replace these values in the commands below:
+
+- `<pi-user>`: your Raspberry Pi SSH username
+- `<pi-host>`: your Raspberry Pi hostname or IP address
+- `<local-project-path>`: the local path to this `apple-tv-automation` folder
+- `/opt/apple-tv-automation`: the target install directory on the Pi
+
+## Install Docker
 
 SSH into the Pi:
 
-```powershell
-ssh pi@raspberrypi.local
+```bash
+ssh <pi-user>@<pi-host>
 ```
 
-Install Docker if it is not installed:
+Install Docker if needed:
 
 ```bash
 curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker pi
+sudo usermod -aG docker <pi-user>
 ```
 
 Log out and back in after adding the user to the `docker` group.
@@ -30,38 +39,38 @@ docker --version
 docker compose version
 ```
 
-## 2. Copy the app to the Pi
+## Copy the App
 
-From this Windows machine:
+From your local machine:
 
-```powershell
-scp -r C:\Users\brian\Documents\Scripts\Python\apple-tv-automation pi@raspberrypi.local:/home/pi/apple-tv-automation
+```bash
+scp -r <local-project-path> <pi-user>@<pi-host>:/tmp/apple-tv-automation
 ```
 
-If `raspberrypi.local` does not resolve, use the Pi IP address.
+Then on the Pi:
 
-## 3. Build and run
+```bash
+sudo rm -rf /opt/apple-tv-automation
+sudo mv /tmp/apple-tv-automation /opt/apple-tv-automation
+sudo chown -R <pi-user>:<pi-user> /opt/apple-tv-automation
+```
+
+## Build and Run
 
 On the Pi:
 
 ```bash
-cd /home/pi/apple-tv-automation
+cd /opt/apple-tv-automation
 docker compose up -d --build
 ```
 
 Open:
 
 ```text
-http://raspberrypi.local:8000/
+http://<pi-host>:8000/
 ```
 
-Or use the Pi IP address:
-
-```text
-http://PI_IP_ADDRESS:8000/
-```
-
-## 4. Pair Apple TVs
+## Pair Apple TVs
 
 Open the web app, scan, select an Apple TV, click Pair, and enter the PIN shown
 on the Apple TV.
@@ -69,15 +78,15 @@ on the Apple TV.
 The pairing file is stored here on the Pi:
 
 ```text
-/home/pi/apple-tv-automation/data/.pyatv.conf
+/opt/apple-tv-automation/data/.pyatv.conf
 ```
 
-## 5. Run as a systemd service
+## Run as a Service
 
-Install the Docker service:
+Install the systemd service:
 
 ```bash
-sudo cp /home/pi/apple-tv-automation/apple-tv-automation-docker.service /etc/systemd/system/apple-tv-automation.service
+sudo cp /opt/apple-tv-automation/apple-tv-automation-docker.service /etc/systemd/system/apple-tv-automation.service
 sudo systemctl daemon-reload
 sudo systemctl enable apple-tv-automation
 sudo systemctl start apple-tv-automation
@@ -92,6 +101,7 @@ sudo systemctl status apple-tv-automation
 View logs:
 
 ```bash
+cd /opt/apple-tv-automation
 docker compose logs -f
 ```
 
@@ -101,12 +111,12 @@ Or:
 journalctl -u apple-tv-automation -f
 ```
 
-## 6. Update after code changes
+## Update After Code Changes
 
 Copy the updated folder again, then run:
 
 ```bash
-cd /home/pi/apple-tv-automation
+cd /opt/apple-tv-automation
 docker compose up -d --build
 ```
 
@@ -116,7 +126,7 @@ If using systemd:
 sudo systemctl restart apple-tv-automation
 ```
 
-## Useful commands
+## Useful Commands
 
 Stop:
 
@@ -141,4 +151,4 @@ docker ps
 - The Pi must be on the same local network as the Apple TVs.
 - `network_mode: host` is intentional for Apple TV discovery.
 - The web app listens on port `8000`.
-- Authentication is not included yet.
+- Authentication is not included.

@@ -1,81 +1,86 @@
-# Deploy to Raspberry Pi
+# Native Python Deployment on Raspberry Pi
 
-These steps run the Apple TV Automation web app on a Raspberry Pi and make it
-available to other devices on your local network.
-
+This deployment runs Apple TV Automation directly with Python on a Raspberry Pi.
 For the Docker deployment, use `DEPLOY_DOCKER_RASPBERRY_PI.md`.
 
-## 1. Copy the app to the Pi
+## Placeholders
 
-From this Windows machine, copy the folder to the Pi. Replace `pi` and
-`raspberrypi.local` if your username or hostname is different.
+Replace these values in the commands below:
 
-```powershell
-scp -r C:\Users\brian\Documents\Scripts\Python\apple-tv-automation pi@raspberrypi.local:/home/pi/apple-tv-automation
-```
+- `<pi-user>`: your Raspberry Pi SSH username
+- `<pi-host>`: your Raspberry Pi hostname or IP address
+- `<local-project-path>`: the local path to this `apple-tv-automation` folder
+- `/opt/apple-tv-automation`: the target install directory on the Pi
 
-If `raspberrypi.local` does not resolve, use the Pi IP address instead.
+## Copy the App
 
-## 2. Install dependencies on the Pi
-
-SSH into the Pi:
-
-```powershell
-ssh pi@raspberrypi.local
-```
-
-Then run:
+From your local machine:
 
 ```bash
-cd /home/pi/apple-tv-automation
+scp -r <local-project-path> <pi-user>@<pi-host>:/tmp/apple-tv-automation
+```
+
+Then on the Pi:
+
+```bash
+sudo rm -rf /opt/apple-tv-automation
+sudo mv /tmp/apple-tv-automation /opt/apple-tv-automation
+sudo chown -R <pi-user>:<pi-user> /opt/apple-tv-automation
+```
+
+## Install Dependencies
+
+On the Pi:
+
+```bash
+cd /opt/apple-tv-automation
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## 3. Test the app manually
+## Test Manually
 
 Run the server on all network interfaces:
 
 ```bash
-cd /home/pi/apple-tv-automation
+cd /opt/apple-tv-automation
 . .venv/bin/activate
 python server.py --host 0.0.0.0 --port 8000
 ```
 
-Open this from another device on the same network:
+Open:
 
 ```text
-http://raspberrypi.local:8000/
+http://<pi-host>:8000/
 ```
 
-If the hostname does not work, use the Pi IP address:
+## Pair Apple TVs
 
-```text
-http://PI_IP_ADDRESS:8000/
-```
-
-## 4. Pair Apple TVs
-
-Pairing credentials are stored per machine, so the Pi may need to pair again
-even if your Windows machine is already paired.
+Pairing credentials are stored per machine, so the Pi may need to pair again.
 
 Open the web app, scan, select an Apple TV, click Pair, and enter the PIN shown
 on the Apple TV.
 
-## 5. Install as a startup service
+## Run as a Service
 
-Edit `apple-tv-automation.service` if your Pi username or app path is not:
+The included `apple-tv-automation.service` assumes:
 
-```text
-/home/pi/apple-tv-automation
-```
+- App path: `/opt/apple-tv-automation`
+- Service user: `appletv`
 
-Then install and start the service:
+Create the service user if needed:
 
 ```bash
-sudo cp /home/pi/apple-tv-automation/apple-tv-automation.service /etc/systemd/system/apple-tv-automation.service
+sudo useradd --system --home /opt/apple-tv-automation --shell /usr/sbin/nologin appletv
+sudo chown -R appletv:appletv /opt/apple-tv-automation
+```
+
+Install and start the service:
+
+```bash
+sudo cp /opt/apple-tv-automation/apple-tv-automation.service /etc/systemd/system/apple-tv-automation.service
 sudo systemctl daemon-reload
 sudo systemctl enable apple-tv-automation
 sudo systemctl start apple-tv-automation
@@ -103,5 +108,5 @@ sudo systemctl restart apple-tv-automation
 
 - The Pi must be on the same local network as the Apple TVs.
 - Apple TV discovery depends on local network discovery/mDNS.
-- The service binds to `0.0.0.0:8000`, so any device on your LAN can open it.
-- Authentication is not included yet.
+- The service binds to `0.0.0.0:8000`, so devices on the LAN can open it.
+- Authentication is not included.
