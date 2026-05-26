@@ -55,6 +55,28 @@
           </div>
 
           <div id="now-playing" class="now-playing"></div>
+
+          <section class="schedule-panel">
+            <div class="section-title">Schedules</div>
+            <form id="schedule-form" class="schedule-form">
+              <select id="schedule-command" aria-label="Schedule command">
+                <option value="on">Power On</option>
+                <option value="off">Power Off</option>
+              </select>
+              <input id="schedule-time" type="time" required>
+              <div class="day-toggles" aria-label="Schedule days">
+                <label><input type="checkbox" value="sun">Sun</label>
+                <label><input type="checkbox" value="mon">Mon</label>
+                <label><input type="checkbox" value="tue">Tue</label>
+                <label><input type="checkbox" value="wed">Wed</label>
+                <label><input type="checkbox" value="thu">Thu</label>
+                <label><input type="checkbox" value="fri">Fri</label>
+                <label><input type="checkbox" value="sat">Sat</label>
+              </div>
+              <button id="add-schedule-button" class="primary" disabled>Add Schedule</button>
+            </form>
+            <div id="schedules" class="schedules"></div>
+          </section>
         </section>
       </section>
     </main>

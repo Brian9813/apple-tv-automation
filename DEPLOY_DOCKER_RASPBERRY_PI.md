@@ -15,6 +15,35 @@ Replace these values in the commands below:
 - `<local-project-path>`: the local path to this `apple-tv-automation` folder
 - `/opt/apple-tv-automation`: the target install directory on the Pi
 
+Do not commit real hostnames, usernames, IP addresses, local paths, or pairing
+files. Keep those values in your shell environment or pass them as command-line
+arguments.
+
+## Deploy Script
+
+From this project folder on your local machine:
+
+```powershell
+.\deploy.cmd -HostName <pi-host> -User <pi-user>
+```
+
+You can also configure the deploy target with local environment variables:
+
+```powershell
+$env:APPLE_TV_DEPLOY_HOST = "<pi-host>"
+$env:APPLE_TV_DEPLOY_USER = "<pi-user>"
+$env:APPLE_TV_DEPLOY_PATH = "/opt/apple-tv-automation"
+.\deploy.cmd
+```
+
+Install the systemd service once:
+
+```powershell
+.\deploy.cmd -HostName <pi-host> -User <pi-user> -InstallService
+```
+
+Normal deploys after that do not need `-InstallService`.
+
 ## Install Docker
 
 SSH into the Pi:
@@ -61,13 +90,20 @@ On the Pi:
 
 ```bash
 cd /opt/apple-tv-automation
-docker compose up -d --build
+docker build -t apple-tv-automation:local .
+docker compose up -d --no-build
 ```
 
 Open:
 
 ```text
-http://<pi-host>:8000/
+http://<pi-host>:2332/
+```
+
+The app exposes a health check at:
+
+```text
+http://<pi-host>:2332/api/health
 ```
 
 ## Pair Apple TVs
@@ -80,6 +116,16 @@ The pairing file is stored here on the Pi:
 ```text
 /opt/apple-tv-automation/data/.pyatv.conf
 ```
+
+Schedules are stored here:
+
+```text
+/opt/apple-tv-automation/data/schedules.json
+```
+
+The Docker configuration sets `APPLE_TV_TIME_ZONE=America/Chicago` by default
+so scheduled events use Central time. Change that environment variable in
+`docker-compose.yml` if the Pi should use a different timezone.
 
 ## Run as a Service
 
@@ -117,7 +163,8 @@ Copy the updated folder again, then run:
 
 ```bash
 cd /opt/apple-tv-automation
-docker compose up -d --build
+docker build -t apple-tv-automation:local .
+docker compose up -d --no-build
 ```
 
 If using systemd:
@@ -146,9 +193,41 @@ See running containers:
 docker ps
 ```
 
+## Troubleshooting
+
+If Docker build fails with an error like:
+
+```text
+PermissionError: [Errno 1] Operation not permitted
+```
+
+while Python is importing `time` or `logging`, the Pi likely has an older
+Docker/libseccomp stack that blocks newer Linux syscalls inside containers.
+
+Update the Pi packages and Docker, then try the deploy again:
+
+```bash
+sudo apt update
+sudo apt full-upgrade -y
+sudo apt install -y libseccomp2
+sudo reboot
+```
+
+After reboot:
+
+```bash
+cd /opt/apple-tv-automation
+docker compose up -d --build
+```
+
 ## Notes
 
 - The Pi must be on the same local network as the Apple TVs.
 - `network_mode: host` is intentional for Apple TV discovery.
-- The web app listens on port `8000`.
+- Python dependencies are installed when the container starts, not during
+  `docker build`. This avoids Raspberry Pi Docker builds that block Python time
+  syscalls during image build steps.
+- `seccomp=unconfined` is applied to the running container for the same reason.
+- The Docker deployment listens on port `2332`.
+- Scheduled commands show their last run result in the browser.
 - Authentication is not included.

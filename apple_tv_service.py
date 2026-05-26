@@ -110,7 +110,7 @@ def preferred_protocol(device):
 
 def feature_available(atv, feature_name):
     feature = atv.features.get_feature(feature_name)
-    return feature.state == FeatureState.Available
+    return feature.state in (FeatureState.Available, FeatureState.Unknown)
 
 
 def supported_commands(atv):
@@ -138,6 +138,10 @@ def supported_commands(atv):
 
 async def list_commands(identifier, address):
     connection = await get_connection(identifier, address)
+
+    if not connection.commands:
+        connection = await reconnect(identifier, address)
+
     return sorted(connection.commands)
 
 
@@ -234,26 +238,42 @@ async def now_playing(identifier, address):
 async def start_pairing(identifier, address):
     device, storage = await find_device(identifier, address)
     loop = asyncio.get_running_loop()
+    protocols = (Protocol.Companion, Protocol.MRP, Protocol.AirPlay)
 
-    for protocol in (Protocol.Companion, Protocol.MRP, Protocol.AirPlay):
-        if device.get_service(protocol):
-            pairing = await pyatv.pair(device, protocol, loop, storage=storage)
-            await pairing.begin()
+    for protocol in protocols:
+        service = device.get_service(protocol)
 
-            session_id = secrets.token_urlsafe(24)
-            PAIRING_SESSIONS[session_id] = PairingSession(
-                pairing=pairing,
-                device_name=device.name,
-                protocol=protocol,
-                storage=storage,
-            )
-
+        if service and service.credentials:
             return {
-                "pairing_id": session_id,
+                "already_paired": True,
                 "device": device.name,
                 "protocol": protocol.name,
-                "device_provides_pin": pairing.device_provides_pin,
             }
+
+    for protocol in protocols:
+        service = device.get_service(protocol)
+
+        if not service:
+            continue
+
+        pairing = await pyatv.pair(device, protocol, loop, storage=storage)
+        await pairing.begin()
+
+        session_id = secrets.token_urlsafe(24)
+        PAIRING_SESSIONS[session_id] = PairingSession(
+            pairing=pairing,
+            device_name=device.name,
+            protocol=protocol,
+            storage=storage,
+        )
+
+        return {
+            "already_paired": False,
+            "pairing_id": session_id,
+            "device": device.name,
+            "protocol": protocol.name,
+            "device_provides_pin": pairing.device_provides_pin,
+        }
 
     raise RuntimeError("No pairable protocol was found for this Apple TV.")
 

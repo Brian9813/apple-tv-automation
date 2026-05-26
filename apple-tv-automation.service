@@ -9,6 +9,7 @@ User=appletv
 WorkingDirectory=/opt/apple-tv-automation
 Environment=APPLE_TV_APP_HOST=0.0.0.0
 Environment=APPLE_TV_APP_PORT=8000
+Environment=APPLE_TV_TIME_ZONE=America/Chicago
 ExecStart=/opt/apple-tv-automation/.venv/bin/python /opt/apple-tv-automation/server.py
 Restart=on-failure
 RestartSec=5

@@ -1,24 +1,27 @@
-FROM python:3.12-slim
+FROM python:3.9-bullseye
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV APPLE_TV_APP_HOST=0.0.0.0
-ENV APPLE_TV_APP_PORT=8000
+ENV APPLE_TV_APP_PORT=2332
+ENV APPLE_TV_TIME_ZONE=America/Chicago
+ENV TZ=America/Chicago
 ENV HOME=/data
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN python -m pip install --no-cache-dir --upgrade pip \
-    && python -m pip install --no-cache-dir -r requirements.txt
-
-COPY apple_tv_service.py server.py ./
+COPY apple_tv_service.py scheduler.py server.py ./
 COPY static ./static
+COPY docker-entrypoint.sh ./
 
 RUN mkdir -p /data
 
 VOLUME ["/data"]
 
-EXPOSE 8000
+EXPOSE 2332
 
-CMD ["python", "server.py"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5m --retries=3 \
+    CMD python -c "import json, urllib.request; print(json.load(urllib.request.urlopen('http://127.0.0.1:2332/api/health', timeout=4))['status'])"
+
+CMD ["sh", "/app/docker-entrypoint.sh"]

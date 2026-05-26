@@ -18,6 +18,91 @@ input {
   font: inherit;
 }
 
+select {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #c8d0d6;
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.schedule-panel {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid #d8dee3;
+  padding-top: 18px;
+}
+
+.schedule-form {
+  display: grid;
+  grid-template-columns: 150px 130px 1fr 140px;
+  gap: 10px;
+  align-items: center;
+}
+
+.day-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.day-toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 0 8px;
+  border: 1px solid #c8d0d6;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.day-toggles input {
+  min-height: auto;
+  width: auto;
+}
+
+.schedules {
+  display: grid;
+  gap: 8px;
+}
+
+.schedule-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 64px;
+  padding: 10px;
+  border: 1px solid #d8dee3;
+  border-radius: 7px;
+}
+
+.schedule-name {
+  font-weight: 700;
+}
+
+.schedule-meta {
+  color: #52616b;
+  font-size: 13px;
+}
+
+.schedule-error {
+  color: #a13b2d;
+}
+
+.schedule-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.schedule-actions button {
+  min-height: 34px;
+  padding: 0 10px;
+}
+
 button {
   border: 1px solid #c8d0d6;
   background: #ffffff;
@@ -248,6 +333,10 @@ input {
 
   .remote-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .schedule-form {
+    grid-template-columns: 1fr;
   }
 
   .direction-pad {

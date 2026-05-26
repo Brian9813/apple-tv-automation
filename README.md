@@ -14,6 +14,9 @@ network.
   - Play and Pause when supported
 - Show basic now-playing metadata when available
 - Reuse live Apple TV connections for faster button presses
+- Schedule Apple TV power on/off events by time and day
+- Show the last scheduled run status in the browser
+- Health check endpoint for deployment/startup readiness
 
 ## Requirements
 
@@ -65,7 +68,7 @@ docker compose up -d --build
 Open:
 
 ```text
-http://<server-host-or-ip>:8000/
+http://<server-host-or-ip>:2332/
 ```
 
 The Docker setup uses host networking so Apple TV discovery can work correctly.
@@ -86,6 +89,16 @@ Docker default:
 ./data/.pyatv.conf
 ```
 
+Schedules are stored in:
+
+```text
+./data/schedules.json
+```
+
+Scheduled events use the `APPLE_TV_TIME_ZONE` environment variable. The Docker
+configuration defaults to `America/Chicago` so browser-entered times match the
+local Central time schedule.
+
 Do not commit or share pairing files. They contain credentials for controlling
 paired devices.
 
@@ -97,6 +110,45 @@ Use one of these guides:
 - `DEPLOY_RASPBERRY_PI.md`
 
 Docker is the preferred deployment path for a Raspberry Pi service.
+
+From a local PowerShell terminal, you can deploy the Docker version with:
+
+```powershell
+.\deploy.cmd -HostName <pi-host> -User <pi-user>
+```
+
+Or set local environment variables first:
+
+```powershell
+$env:APPLE_TV_DEPLOY_HOST = "<pi-host>"
+$env:APPLE_TV_DEPLOY_USER = "<pi-user>"
+$env:APPLE_TV_DEPLOY_PATH = "/opt/apple-tv-automation"
+.\deploy.cmd
+```
+
+To install or restart the systemd service during deploy:
+
+```powershell
+.\deploy.cmd -HostName <pi-host> -User <pi-user> -InstallService
+```
+
+After the service is installed once, normal deploys do not need sudo:
+
+```powershell
+.\deploy.cmd -HostName <pi-host> -User <pi-user>
+```
+
+If the service file already exists, `-InstallService` skips the sudo install
+step. To reinstall the service file, use:
+
+```powershell
+.\deploy.cmd -HostName <pi-host> -User <pi-user> -InstallService -ForceInstallService
+```
+
+The deploy script packages the project, copies it to the Pi, syncs it into the
+remote app directory, preserves `data/`, excludes Git files, and runs Docker
+Compose. Service installation uses `sudo` only when installing or reinstalling
+the systemd service.
 
 ## Configuration
 
@@ -111,7 +163,17 @@ Or environment variables:
 ```bash
 APPLE_TV_APP_HOST=0.0.0.0
 APPLE_TV_APP_PORT=8000
+APPLE_TV_TIME_ZONE=America/Chicago
 python server.py
+```
+
+For Docker, the default port is `2332` and the default scheduler timezone is
+`America/Chicago`.
+
+Health check:
+
+```text
+GET /api/health
 ```
 
 ## Security Notes
@@ -133,4 +195,5 @@ docker-compose.yml                  Docker runtime config
 apple-tv-automation-docker.service  systemd service for Docker deployment
 apple-tv-automation.service         systemd service for native Python deployment
 requirements.txt                    Python dependencies
+scripts/deploy.ps1                  local PowerShell deploy script
 ```

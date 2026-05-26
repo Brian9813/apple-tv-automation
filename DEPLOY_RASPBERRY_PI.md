@@ -12,6 +12,9 @@ Replace these values in the commands below:
 - `<local-project-path>`: the local path to this `apple-tv-automation` folder
 - `/opt/apple-tv-automation`: the target install directory on the Pi
 
+Do not commit real hostnames, usernames, IP addresses, local paths, or pairing
+files. Keep those values outside the repository.
+
 ## Copy the App
 
 From your local machine:
@@ -56,12 +59,22 @@ Open:
 http://<pi-host>:8000/
 ```
 
+Health check:
+
+```text
+http://<pi-host>:8000/api/health
+```
+
 ## Pair Apple TVs
 
 Pairing credentials are stored per machine, so the Pi may need to pair again.
 
 Open the web app, scan, select an Apple TV, click Pair, and enter the PIN shown
 on the Apple TV.
+
+Schedules are stored in `data/schedules.json`. By default, scheduled events use
+`America/Chicago`. Set `APPLE_TV_TIME_ZONE` before starting the service to use a
+different timezone.
 
 ## Run as a Service
 

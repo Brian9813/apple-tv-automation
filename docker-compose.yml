@@ -1,12 +1,18 @@
 services:
   apple-tv-automation:
+    image: apple-tv-automation:local
     build: .
     container_name: apple-tv-automation
     network_mode: host
+    security_opt:
+      - seccomp=unconfined
     restart: unless-stopped
     environment:
       APPLE_TV_APP_HOST: 0.0.0.0
-      APPLE_TV_APP_PORT: 8000
+      APPLE_TV_APP_PORT: 2332
+      APPLE_TV_DATA_DIR: /data
+      APPLE_TV_TIME_ZONE: America/Chicago
+      TZ: America/Chicago
       HOME: /data
     volumes:
       - ./data:/data

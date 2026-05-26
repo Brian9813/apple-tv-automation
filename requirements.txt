@@ -1,2 +1,2 @@
-aiohttp
-pyatv
+aiohttp>=3.9,<4
+pyatv==0.17.0
