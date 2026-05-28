@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Apple TV Automation</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css?v=20260528-tabs">
   </head>
   <body>
     <main class="app-shell">
@@ -22,7 +22,7 @@
           <div id="devices" class="devices"></div>
         </aside>
 
-        <section class="remote-panel">
+        <section class="controls-panel">
           <div class="selected-device">
             <div>
               <div class="section-title">Selected</div>
@@ -32,32 +32,38 @@
             <button id="pair-button" class="secondary" disabled>Pair</button>
           </div>
 
-          <div class="remote-grid">
-            <button data-command="on" title="Power on">Power On</button>
-            <button data-command="off" title="Power off">Power Off</button>
-            <button data-command="home" title="Home">Home</button>
-            <button data-command="menu" title="Menu">Menu</button>
+          <div class="tabs" role="tablist" aria-label="Apple TV controls">
+            <button id="remote-tab" class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="remote-panel" data-tab="remote-panel">Remote</button>
+            <button id="schedules-tab" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="schedules-panel" data-tab="schedules-panel">Schedules</button>
           </div>
 
-          <div class="direction-pad">
-            <button data-command="up" class="up" title="Up">Up</button>
-            <button data-command="left" class="left" title="Left">Left</button>
-            <button data-command="select" class="select" title="Select">OK</button>
-            <button data-command="right" class="right" title="Right">Right</button>
-            <button data-command="down" class="down" title="Down">Down</button>
-          </div>
+          <section id="remote-panel" class="tab-panel remote-controls-panel" role="tabpanel" aria-labelledby="remote-tab">
+            <div class="remote-grid">
+              <button data-command="on" title="Power on">Power On</button>
+              <button data-command="off" title="Power off">Power Off</button>
+              <button data-command="home" title="Home">Home</button>
+              <button data-command="menu" title="Menu">Menu</button>
+            </div>
 
-          <div class="remote-grid">
-            <button data-command="play" title="Play">Play</button>
-            <button data-command="pause" title="Pause">Pause</button>
-            <button data-command="top_menu" title="Top menu">Top Menu</button>
-            <button id="now-button" title="Now playing" disabled>Now Playing</button>
-          </div>
+            <div class="direction-pad">
+              <button data-command="up" class="up" title="Up">Up</button>
+              <button data-command="left" class="left" title="Left">Left</button>
+              <button data-command="select" class="select" title="Select">OK</button>
+              <button data-command="right" class="right" title="Right">Right</button>
+              <button data-command="down" class="down" title="Down">Down</button>
+            </div>
 
-          <div id="now-playing" class="now-playing"></div>
+            <div class="remote-grid">
+              <button data-command="play" title="Play">Play</button>
+              <button data-command="pause" title="Pause">Pause</button>
+              <button data-command="top_menu" title="Top menu">Top Menu</button>
+              <button id="now-button" title="Now playing" disabled>Now Playing</button>
+            </div>
 
-          <section class="schedule-panel">
-            <div class="section-title">Schedules</div>
+            <div id="now-playing" class="now-playing"></div>
+          </section>
+
+          <section id="schedules-panel" class="tab-panel schedule-panel" role="tabpanel" aria-labelledby="schedules-tab" hidden>
             <form id="schedule-form" class="schedule-form">
               <select id="schedule-command" aria-label="Schedule command">
                 <option value="on">Power On</option>
@@ -93,6 +99,6 @@
       </form>
     </dialog>
 
-    <script src="/static/app.js"></script>
+    <script src="/static/app.js?v=20260528-tabs"></script>
   </body>
 </html>

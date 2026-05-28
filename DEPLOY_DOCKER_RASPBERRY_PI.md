@@ -224,9 +224,11 @@ docker compose up -d --build
 
 - The Pi must be on the same local network as the Apple TVs.
 - `network_mode: host` is intentional for Apple TV discovery.
-- Python dependencies are installed when the container starts, not during
-  `docker build`. This avoids Raspberry Pi Docker builds that block Python time
-  syscalls during image build steps.
+- Python dependencies are installed into `./data/.venv` when the container
+  starts, not during `docker build`. The virtual environment is reused on later
+  deploys until `requirements.txt` or the container Python version changes.
+  This avoids Raspberry Pi Docker builds that block Python time syscalls during
+  image build steps.
 - `seccomp=unconfined` is applied to the running container for the same reason.
 - The Docker deployment listens on port `2332`.
 - Scheduled commands show their last run result in the browser.

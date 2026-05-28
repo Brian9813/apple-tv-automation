@@ -11,6 +11,8 @@ const pairForm = document.querySelector("#pair-form");
 const pinInput = document.querySelector("#pin-input");
 const pairMessage = document.querySelector("#pair-message");
 const commandButtons = [...document.querySelectorAll("[data-command]")];
+const tabButtons = [...document.querySelectorAll("[data-tab]")];
+const tabPanels = [...document.querySelectorAll(".tab-panel")];
 const scheduleForm = document.querySelector("#schedule-form");
 const scheduleCommand = document.querySelector("#schedule-command");
 const scheduleTime = document.querySelector("#schedule-time");
@@ -98,6 +100,18 @@ function updateCommandButtons() {
   pairButton.disabled = !hasDevice;
   nowButton.disabled = !hasDevice;
   addScheduleButton.disabled = !hasDevice;
+}
+
+function showTab(panelId) {
+  for (const button of tabButtons) {
+    const isActive = button.dataset.tab === panelId;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  }
+
+  for (const panel of tabPanels) {
+    panel.hidden = panel.id !== panelId;
+  }
 }
 
 async function refreshCommands() {
@@ -415,11 +429,19 @@ pairForm.addEventListener("submit", finishPairing);
 scheduleForm.addEventListener("submit", addSchedule);
 schedulesEl.addEventListener("click", handleScheduleAction);
 
+for (const button of tabButtons) {
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    showTab(button.dataset.tab);
+  });
+}
+
 for (const button of commandButtons) {
   button.addEventListener("click", () => sendRemoteCommand(button.dataset.command));
 }
 
 renderDevices();
 updateCommandButtons();
+showTab("remote-panel");
 scan();
 loadSchedules();

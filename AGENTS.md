@@ -55,6 +55,12 @@ Main files:
 
 Docker is the preferred Raspberry Pi deployment path.
 
+First-time Docker service deploy from this project folder:
+
+```powershell
+.\deploy.cmd -HostName <pi-host> -User <pi-user> -InstallService
+```
+
 Expected Docker behavior:
 
 - App runs on port `2332` by default.
@@ -63,8 +69,10 @@ Expected Docker behavior:
 - `APPLE_TV_TIME_ZONE=America/Chicago`
 - `HOME=/data`
 - `./data:/data` persists pairing credentials.
-- Python dependencies are installed at container startup because some Raspberry
-  Pi Docker/libseccomp combinations block Python during image build steps.
+- Python dependencies are installed into `./data/.venv` at container startup
+  because some Raspberry Pi Docker/libseccomp combinations block Python during
+  image build steps. The persisted virtual environment is reused until
+  `requirements.txt` or the container Python version changes.
 
 The deploy script must not contain personal defaults. Use `-HostName`, `-User`,
 `-RemotePath`, or local environment variables:

@@ -72,6 +72,9 @@ http://<server-host-or-ip>:2332/
 ```
 
 The Docker setup uses host networking so Apple TV discovery can work correctly.
+Python dependencies are installed into `./data/.venv` the first time the
+container starts and are reused on later deploys until `requirements.txt` or
+the container Python version changes.
 
 ## Pairing Data
 

@@ -103,6 +103,46 @@ function Wait-ForAppHealth {
     throw "App did not become healthy within $TimeoutSeconds seconds."
 }
 
+function Wait-ForDependencyInstall {
+    param(
+        [int]$TimeoutSeconds = 420
+    )
+
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    $attempt = 1
+
+    Write-Host "Waiting for container dependency install to finish before health checks"
+
+    while ((Get-Date) -lt $deadline) {
+        $logs = & ssh $Remote "cd '$RemotePath'; docker compose logs --tail=120 apple-tv-automation"
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Container logs are not available yet... check $attempt"
+        }
+        elseif ($logs -match "Building wheel for miniaudio .* finished with status 'done'" -or
+            $logs -match "Successfully built .*miniaudio" -or
+            $logs -match "Successfully installed " -or
+            $logs -match "Python dependencies are already installed" -or
+            $logs -match "Running on http://") {
+            Write-Host "Container dependency install has progressed past miniaudio."
+            return
+        }
+        else {
+            Write-Host "Dependencies are still installing... check $attempt"
+
+            if (($attempt % 4) -eq 0) {
+                $logs | Select-Object -Last 25 | Write-Host
+            }
+        }
+
+        $attempt += 1
+        Start-Sleep -Seconds 10
+    }
+
+    & ssh $Remote "cd '$RemotePath'; docker compose logs --tail=120 apple-tv-automation"
+    throw "Container dependency install did not finish within $TimeoutSeconds seconds."
+}
+
 function Get-RemoteLanAddress {
     $addresses = (& ssh $Remote "hostname -I").Trim().Split(" ", [System.StringSplitOptions]::RemoveEmptyEntries)
     $address = $addresses | Where-Object { $_ -match "^192\.168\." } | Select-Object -First 1
@@ -221,6 +261,7 @@ else {
 }
 
 Invoke-RemoteCommand "Showing recent container logs" "cd '$RemotePath'; docker compose logs --tail=80 apple-tv-automation"
+Wait-ForDependencyInstall
 Wait-ForAppHealth
 Wait-ForLanHealth
 
